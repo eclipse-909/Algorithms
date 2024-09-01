@@ -1,0 +1,3 @@
+file(GLOB ASSIGNMENT1_SOURCES "*.cpp")
+
+add_executable(Assignment1 ${ASSIGNMENT1_SOURCES} ${COMMON_SOURCES})
