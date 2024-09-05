@@ -3,7 +3,7 @@ ___
 ## Assignment0
 A limerick about C++ written with LaTeX.
 ## Assignment1
-TODO
+Stacks, queues, linked lists, selection/insertion/merge/quick sort, magicitems.txt
 ## Assignment2
 TODO
 ## Assignment3
