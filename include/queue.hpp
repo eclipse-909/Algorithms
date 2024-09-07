@@ -49,6 +49,9 @@ public:
 		Node<T>* next = head->next;
 		delete head;
 		head = next;
+		if (head == nullptr) {
+			tail = nullptr;
+		}
 		return data;
 	}
 

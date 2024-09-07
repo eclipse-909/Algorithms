@@ -4,34 +4,42 @@
 #include <random>
 #include <algorithm>
 #include <cassert>
-#include <vector>
 
 #include "stack.hpp"
 #include "queue.hpp"
 
-void knuthShuffle(std::string* arr, const int size) {
+using std::string;
+
+//By the way, I like using i, ii, iii, iv for nested loop indices
+//because i and j look too similar sometimes
+//and Roman numerals make more sense for counting nest level.
+
+void knuthShuffle(string* arr, const int size) {
 	std::random_device rd;
 	std::mt19937 gen(rd());
+	//count backwards from the array
 	for (int i = size - 1; i > 0; i--) {
+		//pick a random index in the array and swap the element with the element at i
 		std::uniform_int_distribution dist(0, i);
 		const int ii = dist(gen);
-		std::swap(arr[i], arr[ii]);
+		swap(arr[i], arr[ii]);
 	}
 }
 
-int selectionSort(std::string* arr, const int size) {
+//Time complexity O(n^2)
+//Specifically n(n-1)/2
+int selectionSort(string* arr, const int size) {
 	int comparisons = 0;
 	for (int i = 0; i < size - 1; i++) {
 		int min = i;
-		//By the way, I like using i, ii, iii, iv for nested loop indices
-		//because i and j look too similar sometimes
-		//and Roman numerals make more sense for counting nest level.
+		//find the smallest element in the array after the index i
 		for (int ii = i + 1; ii < size; ii++) {
 			if (arr[ii] < arr[min]) {
 				min = ii;
 			}
 			comparisons++;
 		}
+		//swap the smallest element with the element at the current position
 		if (min != i) {
 			swap(arr[min], arr[i]);
 		}
@@ -39,50 +47,50 @@ int selectionSort(std::string* arr, const int size) {
 	return comparisons;
 }
 
-//The number of comparisons in the insertion sort changes each time the exe is run.
-//I can't tell if this is due to randomness in the shuffle, and the insertion sort does more or less
-//comparisons based on how shuffled the array already was, or if this is undefined behavior.
-//The other sorting algorithms have repeatable outputs despite the shuffling.
-//Maybe that's inherent to the algorithm, but I'm not sure.
-//All algorithms are followed by an assertion to make sure they all produce the same output,
-//and all of them pass the assertion. I looked at multiple sources to see how they implemented the
-//insertion sort and nothing appears to be incorrect.
-int insertionSort(std::string* arr, const int size) {
+//Time complexity O(n^2)
+//Specifically ~ n(n-1)/4
+int insertionSort(string* arr, const int size) {
 	int comparisons = 0;
 	for (int i = 1; i < size; i++) {
-		const std::string key = arr[i];
+		const string key = arr[i];
 		int ii = i - 1;
-		while (ii >= 0 && arr[ii] > key) {
+		//find where the current element should go in the sorted portion of the array
+		while (ii >= 0 && key < arr[ii]) {
+			comparisons++;
 			arr[ii + 1] = arr[ii];
 			ii--;
-			comparisons++;
 		}
+		comparisons++;//A comparison is made when the while loop stops
 		arr[ii + 1] = key;
 	}
 	return comparisons;
 }
 
-int mergeSort(std::string* arr, const int left, const int right) {
-	int comparisons = 0;
+int mergeSortHelper(string* arr, const int left, const int right) {
 	if (left >= right) {
 		return 0;
 	}
+	int comparisons = 0;
 	const int mid = left + (right - left) / 2;
-	comparisons += mergeSort(arr, left, mid);
-	comparisons += mergeSort(arr, mid + 1, right);
-	//create left and right temp arrays
+	//merge sort on left side of array
+	comparisons += mergeSortHelper(arr, left, mid);
+	//merge sort on right side of array
+	comparisons += mergeSortHelper(arr, mid + 1, right);
+	//divide into left and right temp arrays
 	const int leftArrLen = mid - left + 1;
 	const int rightArrLen = right - mid;
-	std::string leftArr[leftArrLen], rightArr[rightArrLen];
+	string leftArr[leftArrLen];//the stack won't be happy about this
+	string rightArr[rightArrLen];
 	for (int i = 0; i < leftArrLen; i++) {
 		leftArr[i] = arr[left + i];
 	}
 	for (int i = 0; i < rightArrLen; i++) {
 		rightArr[i] = arr[mid + 1 + i];
 	}
-	//divide, conquer, and merge
+	//compare and sort
 	int i = 0, ii = 0, iii = left;
 	while (i < leftArrLen && ii < rightArrLen) {
+		comparisons++;
 		if (leftArr[i] <= rightArr[ii]) {
 			arr[iii] = leftArr[i];
 			i++;
@@ -91,59 +99,65 @@ int mergeSort(std::string* arr, const int left, const int right) {
 			ii++;
 		}
 		iii++;
-		comparisons++;
 	}
+	comparisons++;//A comparison is made when the while loop stops
+	//merge back together
 	while (i < leftArrLen) {
 		arr[iii] = leftArr[i];
 		i++;
 		iii++;
-		comparisons++;//does this count as a comparison?
 	}
 	while (ii < rightArrLen) {
 		arr[iii] = rightArr[ii];
 		ii++;
 		iii++;
-		comparisons++;//does this count as a comparison?
 	}
 	return comparisons;
 }
 
-int mergeSort(std::string* arr, const int size) {
-	return mergeSort(arr, 0, size - 1);
+//Time complexity O(nlog2(n))
+//Specifically it's slightly better on average
+int mergeSort(string* arr, const int size) {
+	return mergeSortHelper(arr, 0, size - 1);
 }
 
-int quickSort(std::string* arr, const int low, const int high) {
+int quickSortHelper(string* arr, const int left, const int right) {
+	if (left >= right) {
+		return 0;
+	}
 	int comparisons = 0;
-	if (low < high) {
-		const int pivot = high;
-		int i = low - 1;
-		for (int ii = low; ii <= high - 1; ii++) {
-			if (arr[ii] < arr[pivot]) {
-				i++;
-				std::swap(arr[i], arr[ii]);
-			}
-			comparisons++;
+	const string pivot = arr[right];
+	int i = left - 1;
+	//move all elements in sub-array with respect to the pivot
+	for (int ii = left; ii < right; ii++) {
+		if (arr[ii] < pivot) {
+			i++;
+			swap(arr[i], arr[ii]);
 		}
-		std::swap(arr[i + 1], arr[high]);
-		const int partitionIndex = i + 1;
-		comparisons += quickSort(arr, low, partitionIndex - 1);
-		comparisons += quickSort(arr, partitionIndex + 1, high);
+		comparisons++;
 	}
+	swap(arr[i + 1], arr[right]);
+	//divide into left and right arrays
+	const int partitionIndex = i + 1;
+	comparisons += quickSortHelper(arr, left, partitionIndex - 1);
+	comparisons += quickSortHelper(arr, partitionIndex + 1, right);
 	return comparisons;
 }
 
-int quickSort(std::string* arr, const int size) {
-	return quickSort(arr, 0, size - 1);
+//Time complexity ~ O(nlog2(n))
+//Specifically it's a little worse on average
+int quickSort(string* arr, const int size) {
+	return quickSortHelper(arr, 0, size - 1);
 }
 
 int main() {
 	constexpr int ARR_LEN = 666;
 
-	std::string lines[ARR_LEN];
+	string lines[ARR_LEN];
 
 	//print palindromes
 	if (std::ifstream file("./magicitems.txt"); file.is_open()) {
-		std::string line;
+		string line;
 		std::cout << "Palindromes:" << std::endl;
 		int i = 0;
 		int palindromes = 0;
@@ -153,9 +167,9 @@ int main() {
 			Queue<char> queue = Queue<char>();
 
 			// create copy string that ignores case and space
-			std::string copy = line;
-			std::ranges::transform(copy, copy.begin(), [](const unsigned char c) { return std::tolower(c); });
-			std::erase(copy, ' ');
+			string copy = line;
+			std::ranges::transform(copy, copy.begin(), [](const unsigned char c) -> unsigned char {return std::tolower(c);});
+			erase(copy, ' ');
 
 			//add characters
 			for (const char c : copy) {
@@ -176,7 +190,7 @@ int main() {
 				std::cout << line << std::endl;
 				palindromes++;
 			}
-			lines[0] = line;
+			lines[i] = line;//I was previously doing "lines[0] = line;" and it took me hours to figure out why it wasn't working
 			i++;
 		}
 		file.close();
@@ -188,30 +202,26 @@ int main() {
 
 	//sort lines
 	knuthShuffle(lines, ARR_LEN);
-	//Comparisons: 221,445
 	std::cout << "Selection Sort Comparisons: " << selectionSort(lines, ARR_LEN) << std::endl;
 	//use assertions to verify that all sorts produce the same output
-	std::string linesCopy[ARR_LEN];
+	string linesCopy[ARR_LEN];
 	for (int i = 0; i < ARR_LEN; i++) {
 		linesCopy[i] = lines[i];
 	}
 
 	knuthShuffle(lines, ARR_LEN);
-	//Comparisons: variable; a few hundred on average
 	std::cout << "Insertion Sort Comparisons: " << insertionSort(lines, ARR_LEN) << std::endl;
 	for (int i = 0; i < ARR_LEN; i++) {
 		assert(linesCopy[i] == lines[i] && "Arrays are not equal");
 	}
 
 	knuthShuffle(lines, ARR_LEN);
-	//Comparisons: 6,302
 	std::cout << "Merge Sort Comparisons: " << mergeSort(lines, ARR_LEN) << std::endl;
 	for (int i = 0; i < ARR_LEN; i++) {
 		assert(linesCopy[i] == lines[i] && "Arrays are not equal");
 	}
 
 	knuthShuffle(lines, ARR_LEN);
-	//Comparisons: 221,445
 	std::cout << "Quick Sort Comparisons: " << quickSort(lines, ARR_LEN) << std::endl;
 	for (int i = 0; i < ARR_LEN; i++) {
 		assert(linesCopy[i] == lines[i] && "Arrays are not equal");
