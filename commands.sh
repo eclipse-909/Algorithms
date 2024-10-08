@@ -11,6 +11,7 @@ alias build_test='g++ -std=c++20 -I./include -static -o bin/Tests Tests/*.cpp'
 # Use --a1 --a2 --a3 --a4 to build specific assignments.
 # Use -t to also build the test program, but you don't need this one.
 build() {
+  mkdir -p bin
   a1=false
   a2=false
   a3=false

@@ -4,6 +4,7 @@
 #include <random>
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 
 #include "stack.hpp"
 #include "queue.hpp"
@@ -168,8 +169,10 @@ int main() {
 
 			// create copy string that ignores case and space
 			string copy = line;
-			std::ranges::transform(copy, copy.begin(), [](const unsigned char c) -> unsigned char {return std::tolower(c);});
-			erase(copy, ' ');
+			copy.erase(remove_if(copy.begin(), copy.end(), isspace), copy.end());
+			std::transform(copy.begin(), copy.end(), copy.begin(), [](const unsigned char c) {
+				return std::tolower(c);
+			});
 
 			//add characters
 			for (const char c : copy) {
