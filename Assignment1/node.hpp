@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef NODE_HPP
 #define NODE_HPP
 
@@ -9,9 +7,7 @@ template <typename T> struct Node {
 	T data;
 	Node* next;
 
-	explicit Node(T item) : data(item), next(nullptr) {}
-
-	Node(T item, Node<T>* next) : data(item), next(next) {}
+	inline Node(T item, Node<T>* next = nullptr) : data(item), next(next) {}
 };
 
 #endif //NODE_HPP

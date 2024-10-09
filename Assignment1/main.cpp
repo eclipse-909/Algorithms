@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cctype>
+#include <vector>
 
 #include "stack.hpp"
 #include "queue.hpp"
@@ -80,8 +81,10 @@ int mergeSortHelper(string* arr, const int left, const int right) {
 	//divide into left and right temp arrays
 	const int leftArrLen = mid - left + 1;
 	const int rightArrLen = right - mid;
-	string leftArr[leftArrLen];//the stack won't be happy about this
-	string rightArr[rightArrLen];
+	std::vector<string> leftArr = std::vector<string>(leftArrLen);
+	std::vector<string> rightArr = std::vector<string>(rightArrLen);
+	// string leftArr[leftArrLen];//the stack won't be happy about this
+	// string rightArr[rightArrLen];
 	for (int i = 0; i < leftArrLen; i++) {
 		leftArr[i] = arr[left + i];
 	}
@@ -157,7 +160,7 @@ int main() {
 	string lines[ARR_LEN];
 
 	//print palindromes
-	if (std::ifstream file("./magicitems.txt"); file.is_open()) {
+	if (std::ifstream file("../magicitems.txt"); file.is_open()) {
 		string line;
 		std::cout << "Palindromes:" << std::endl;
 		int i = 0;

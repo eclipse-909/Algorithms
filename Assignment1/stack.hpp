@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef STACK_HPP
 #define STACK_HPP
 
@@ -17,10 +15,10 @@ private:
 
 public:
 	/// Creates an empty stack.
-	Stack() : top(nullptr) {}
+	inline Stack() : top(nullptr) {}
 
 	/// Deallocates all allocated nodes from the heap.
-	~Stack() {
+	inline ~Stack() {
 		while (top != nullptr) {
 			Node<T>* next = top->next;
 			delete top;
@@ -29,7 +27,7 @@ public:
 	}
 
     /// Adds the item on top of the stack.
-	void push(T item) {
+	inline void push(T item) {
 		if (top == nullptr) {
 			top = new Node<T>(item);
 			return;
@@ -40,7 +38,7 @@ public:
 
 	/// Removes the item from the top of the stack.
 	/// Deletes data from the heap and copies the data into the stack.
-	optional<T> pop() {
+	inline optional<T> pop() {
 		if (top == nullptr) {
 			return nullopt;
 		}
@@ -52,12 +50,12 @@ public:
 	}
 
 	/// Returns nullptr if stack is empty, otherwise it views the item on the top of the stack without removing it.
-	T* peek() {
+	inline T* peek() {
 		if (top == nullptr) {return nullptr;}
 		return &top->data;
 	}
 
-	bool isEmpty() {
+	inline bool isEmpty() {
 		return top == nullptr;
 	}
 };
