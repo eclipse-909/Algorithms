@@ -108,7 +108,7 @@ int main() {
 		for (const string& ln : lines) {
 			comparisons++;
 			if (rand == ln) {
-				break;
+				break;//It's assumed that the target string will be found
 			}
 		}
 		printf("Linear search comparisons for %s: %d\n", rand.c_str(), comparisons);
@@ -116,7 +116,25 @@ int main() {
 	}
 
 	//binary search
-	//TODO
+	int left, right, mid;
+	for (const string& rand : rand42) {
+		left = 0;
+		right = ARR_LEN - 1;
+		while (left < right) {
+			comparisons++;
+			mid = (left + right) / 2;
+			if (rand == lines[mid]) {
+				break;//It's assumed that the target string will be found
+			}
+			if (rand < lines[mid]) {
+				right = mid - 1;
+			} else {
+				left = mid + 1;
+			}
+		}
+		printf("Binary search comparisons for %s: %d\n", rand.c_str(), comparisons);
+		comparisons = 0;
+	}
 
 	return 0;
 }
