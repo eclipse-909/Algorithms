@@ -16,10 +16,10 @@ private:
 
 public:
 	/// Creates an empty queue.
-	inline Queue() : head(nullptr), tail(nullptr) {}
+	Queue() : head(nullptr), tail(nullptr) {}
 
 	/// Deallocates all allocated nodes from the heap.
-	inline ~Queue() {
+	~Queue() {
 		while (head != nullptr) {
 			Node<T>* next = head->next;
 			delete head;
@@ -28,7 +28,7 @@ public:
 	}
 
 	/// Adds the item to the tail of the queue.
-	inline void enqueue(T item) {
+	void enqueue(T item) {
 		if (tail == nullptr) {
 			head = tail = new Node<T>(item);
 			return;
@@ -39,7 +39,7 @@ public:
 
 	/// Removes the item from the head of the queue.
 	/// Deletes data from the heap and copies the data into the stack.
-	inline optional<T> dequeue() {
+	optional<T> dequeue() {
 		if (head == nullptr) {
 			return nullopt;
 		}
@@ -54,14 +54,14 @@ public:
 	}
 
 	/// Returns nullptr if the queue is empty, otherwise it views the item at the head of the queue without removing it.
-	inline T* peek() {
+	T* peek() {
 		if (head == nullptr) {
 			return nullptr;
 		}
 		return &head->data;
 	}
 
-	inline bool isEmpty() {
+	bool isEmpty() {
 		return head == nullptr;
 	}
 };

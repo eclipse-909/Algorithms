@@ -1,4 +1,5 @@
-#include <iostream>
+//I don't know why, but I can't link with <iostream>
+#include <cstdio>
 #include <fstream>
 #include <string>
 #include <random>
@@ -162,7 +163,7 @@ int main() {
 	//print palindromes
 	if (std::ifstream file("../magicitems.txt"); file.is_open()) {
 		string line;
-		std::cout << "Palindromes:" << std::endl;
+		printf("Palindromes:\n");
 		int i = 0;
 		int palindromes = 0;
 		while (std::getline(file, line)) {
@@ -193,22 +194,22 @@ int main() {
 			}
 			//print if palindrome
 			if (palindrome) {
-				std::cout << line << std::endl;
+				printf("%s\n", line.c_str());
 				palindromes++;
 			}
 			lines[i] = line;//I was previously doing "lines[0] = line;" and it took me hours to figure out why it wasn't working
 			i++;
 		}
 		file.close();
-		std::cout << "Lines read: " << i << std::endl;
-		std::cout << "Palindromes: " << palindromes << std::endl;
+		printf("Lines read: %d\n", i);
+		printf("Palindromes: %d\n", palindromes);
 	} else {
-		std::cerr << "Unable to open file." << std::endl;
+		printf("Unable to open file\n");
 	}
 
 	//sort lines
 	knuthShuffle(lines, ARR_LEN);
-	std::cout << "Selection Sort Comparisons: " << selectionSort(lines, ARR_LEN) << std::endl;
+	printf("Selection Sort Comparisons: %d\n", selectionSort(lines, ARR_LEN));
 	//use assertions to verify that all sorts produce the same output
 	string linesCopy[ARR_LEN];
 	for (int i = 0; i < ARR_LEN; i++) {
@@ -216,19 +217,19 @@ int main() {
 	}
 
 	knuthShuffle(lines, ARR_LEN);
-	std::cout << "Insertion Sort Comparisons: " << insertionSort(lines, ARR_LEN) << std::endl;
+	printf("Insertion Sort Comparisons: %d\n", insertionSort(lines, ARR_LEN));
 	for (int i = 0; i < ARR_LEN; i++) {
 		assert(linesCopy[i] == lines[i] && "Arrays are not equal");
 	}
 
 	knuthShuffle(lines, ARR_LEN);
-	std::cout << "Merge Sort Comparisons: " << mergeSort(lines, ARR_LEN) << std::endl;
+	printf("Merge Sort Comparisons: %d\n", mergeSort(lines, ARR_LEN));
 	for (int i = 0; i < ARR_LEN; i++) {
 		assert(linesCopy[i] == lines[i] && "Arrays are not equal");
 	}
 
 	knuthShuffle(lines, ARR_LEN);
-	std::cout << "Quick Sort Comparisons: " << quickSort(lines, ARR_LEN) << std::endl;
+	printf("Quick Sort Comparisons: %d\n", quickSort(lines, ARR_LEN));
 	for (int i = 0; i < ARR_LEN; i++) {
 		assert(linesCopy[i] == lines[i] && "Arrays are not equal");
 	}

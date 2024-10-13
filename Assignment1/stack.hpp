@@ -15,10 +15,10 @@ private:
 
 public:
 	/// Creates an empty stack.
-	inline Stack() : top(nullptr) {}
+	Stack() : top(nullptr) {}
 
 	/// Deallocates all allocated nodes from the heap.
-	inline ~Stack() {
+	~Stack() {
 		while (top != nullptr) {
 			Node<T>* next = top->next;
 			delete top;
@@ -27,7 +27,7 @@ public:
 	}
 
     /// Adds the item on top of the stack.
-	inline void push(T item) {
+	void push(T item) {
 		if (top == nullptr) {
 			top = new Node<T>(item);
 			return;
@@ -38,7 +38,7 @@ public:
 
 	/// Removes the item from the top of the stack.
 	/// Deletes data from the heap and copies the data into the stack.
-	inline optional<T> pop() {
+	optional<T> pop() {
 		if (top == nullptr) {
 			return nullopt;
 		}
@@ -50,12 +50,12 @@ public:
 	}
 
 	/// Returns nullptr if stack is empty, otherwise it views the item on the top of the stack without removing it.
-	inline T* peek() {
+	T* peek() {
 		if (top == nullptr) {return nullptr;}
 		return &top->data;
 	}
 
-	inline bool isEmpty() {
+	bool isEmpty() {
 		return top == nullptr;
 	}
 };

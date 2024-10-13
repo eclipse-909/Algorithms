@@ -7,7 +7,7 @@ template <typename T> struct Node {
 	T data;
 	Node* next;
 
-	inline Node(T item, Node<T>* next = nullptr) : data(item), next(next) {}
+	explicit Node(T item, Node* next = nullptr) : data(item), next(next) {}
 };
 
 #endif //NODE_HPP
