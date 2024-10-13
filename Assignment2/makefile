@@ -1,6 +1,6 @@
 # Variables
 CXX = g++
-CXXFLAGS = -std=c++20 -g -O0
+CXXFLAGS = -std=c++20
 SRCS = main.cpp hashtable.cpp
 DEPS = hashtable.hpp queue.hpp node.hpp
 TARGET = Assignment2
@@ -12,6 +12,10 @@ all: $(BIN_DIR)/$(TARGET)
 # Rule to compile and create the executable in the bin directory
 $(BIN_DIR)/$(TARGET): $(SRCS) $(DEPS)
 	$(CXX) $(CXXFLAGS) $(SRCS) -o $(BIN_DIR)/$(TARGET)
+
+# Compile with breakpoint/step debugging for gdb
+debug:
+	$(CXX) $(CXXFLAGS) -g -O0 $(SRCS) -o $(BIN_DIR)/$(TARGET)
 
 # Clean up the executable
 clean:

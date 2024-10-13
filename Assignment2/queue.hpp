@@ -25,8 +25,8 @@ public:
 	}
 
 	/// Adds the item to the tail of the queue.
-	void enqueue(const T& item) {
-		if (tail == nullptr) {
+	void enqueue(const T& item) noexcept {
+		if (head == nullptr) {
 			head = tail = new Node<T>(item);
 			return;
 		}
