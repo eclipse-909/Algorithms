@@ -1,7 +1,8 @@
 # Variables
 CXX = g++
-CXXFLAGS = -std=c++20
-SRCS = main.cpp
+CXXFLAGS = -std=c++20 -g -O0
+SRCS = main.cpp hashtable.cpp
+DEPS = hashtable.hpp queue.hpp node.hpp
 TARGET = Assignment2
 BIN_DIR = .
 
@@ -14,7 +15,7 @@ $(BIN_DIR)/$(TARGET): $(SRCS) $(DEPS)
 
 # Clean up the executable
 clean:
-	$(RM) $(BIN_DIR)/$(TARGET)  # Make sure this line starts with a tab
+	$(RM) $(BIN_DIR)/$(TARGET)
 
 # Rebuild the project
 rebuild: clean $(BIN_DIR)/$(TARGET)

@@ -3,7 +3,7 @@
 
 /// Node for linked-list-style data structures.
 /// Data structures are responsible for cleaning up resources used by Nodes.
-template <typename T> struct Node {
+template<typename T> struct Node {
 	T data;
 	Node* next;
 

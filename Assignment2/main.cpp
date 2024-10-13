@@ -4,8 +4,10 @@
 #include <vector>
 #include <random>
 
-#include <string>
-using std::string;
+#include "hashtable.hpp"
+
+#define ARR_LEN 666
+#define FORTY_TWO 42
 
 int mergeSortHelper(string* arr, const int left, const int right) {
 	if (left >= right) {
@@ -83,7 +85,6 @@ int main() {
 		printf("Unable to open file\n");
 		return 1;
 	}
-	constexpr int ARR_LEN = 666;
 	string lines[ARR_LEN];
 	string line;
 	int index = 0;
@@ -94,7 +95,6 @@ int main() {
 	file.close();
 
 	//Get 42 random items
-	constexpr int FORTY_TWO = 42;
 	string rand42[FORTY_TWO];
 	knuthShuffle(lines, ARR_LEN);
 	for (int i = 0; i < FORTY_TWO; i++) {
@@ -104,6 +104,7 @@ int main() {
 
 	//linear search
 	int comparisons = 0;
+	int totalComparisons = 0;
 	for (const string& rand : rand42) {
 		for (const string& ln : lines) {
 			comparisons++;
@@ -112,10 +113,13 @@ int main() {
 			}
 		}
 		printf("Linear search comparisons for %s: %d\n", rand.c_str(), comparisons);
+		totalComparisons += comparisons;
 		comparisons = 0;
 	}
+	printf("Linear search average comparisons: %.2f\n", static_cast<float>(totalComparisons) / static_cast<float>(FORTY_TWO));
 
 	//binary search
+	totalComparisons = 0;
 	int left, right, mid;
 	for (const string& rand : rand42) {
 		left = 0;
@@ -133,7 +137,23 @@ int main() {
 			}
 		}
 		printf("Binary search comparisons for %s: %d\n", rand.c_str(), comparisons);
+		totalComparisons += comparisons;
 		comparisons = 0;
+	}
+	printf("Binary search average comparisons: %.2f\n", static_cast<float>(totalComparisons) / static_cast<float>(FORTY_TWO));
+
+	//hash table
+	HashTable table = HashTable();
+	for (const string& ln : lines) {
+		table.insert(ln);
+	}
+	//BUG sometimes the bucket uses a queue when there is only one string in the queue
+	//BUG Queue::search always returns -1
+	//BUG in Value::Value(const string& value) I am writing to memory on the heap after it has been freed
+	//BUG in Value::Value(const string& value) invalid address specified to system call to free heap memory
+	//BUG seg fault in HashTable::search
+	for (const string& str : rand42) {
+		printf("HashTable retrieval comparisons for %s: %d\n", str.c_str(), table.search(str));
 	}
 
 	return 0;
