@@ -1,8 +1,9 @@
-//I don't know why, but I can't link with <iostream>
+//I don't know why, but I can't link with <iostream>, <optional>, or <variant>
 #include <cstdio>
 #include <fstream>
 #include <vector>
 #include <random>
+#include <cassert>
 
 #include "hashtable.hpp"
 
@@ -148,12 +149,14 @@ int main() {
 	for (const string& ln : lines) {
 		table.insert(ln);
 	}
-	//BUG sometimes the bucket uses a queue when there is only one string in the queue.
-	//BUG Queue::search always returns 0. It never finds the target item.
-	//BUG seg fault in HashTable::search.
+	totalComparisons = 0;
 	for (const string& str : rand42) {
-		printf("HashTable retrieval comparisons for %s: %d\n", str.c_str(), table.search(str));
+		comparisons = table.search(str);
+		assert(comparisons > 0);//We expect to find the item since we just inserted it
+		totalComparisons += comparisons;
+		printf("HashTable retrieval comparisons for %s: %d\n", str.c_str(), comparisons);
 	}
+	printf("HashTable search average comparisons: %.2f\n", static_cast<float>(totalComparisons) / static_cast<float>(NUM_RAND));
 
 	return 0;
 }

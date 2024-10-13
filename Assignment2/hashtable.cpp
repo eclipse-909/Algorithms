@@ -1,8 +1,5 @@
-//I don't know why, but I can't link with <iostream>
-#include <cstdio>
 #include <algorithm>
 #include <cctype>
-#include <cassert>
 
 #include "hashtable.hpp"
 
@@ -18,30 +15,46 @@ int HashTable::hash(string value) {
 	return letterTotal % HASHTABLE_SIZE;
 }
 
+Bucket::Bucket() : tag(Tag::Empty) {}
+Bucket::~Bucket() {
+	switch (tag) {
+		case Tag::Empty:break;
+		case Tag::Str:
+			str.~string();
+			break;
+		case Tag::Queue:
+			queue.~Queue();
+	}
+}
+
 void Bucket::insert(const string& new_str) {
-	if (std::holds_alternative<std::monostate>(variant)) {
-		variant = new_str;
-	} else if (std::holds_alternative<string>(variant)) {
-		string copy = std::get<string>(variant);
-		variant = Queue<string>();
-		std::get<Queue<string>>(variant).enqueue(copy);
-		std::get<Queue<string>>(variant).enqueue(new_str);
-	} else if (std::holds_alternative<Queue<string>>(variant)) {
-		std::get<Queue<string>>(variant).enqueue(new_str);
+	switch (tag) {
+		case Tag::Empty:
+			tag = Tag::Str;
+			new (&str) string(new_str);
+			break;
+		case Tag::Str: {
+			std::string copy = std::move(str);
+			str.~string();
+			tag = Tag::Queue;
+			new (&queue) Queue<string>();
+			queue.enqueue(copy);
+			queue.enqueue(new_str);
+			break;
+		}
+		case Tag::Queue:
+			queue.enqueue(new_str);
 	}
 }
 
 int Bucket::search(const string& find_str) const {
-	if (std::holds_alternative<std::monostate>(variant)) {
-		return 1;
-	} else if (std::holds_alternative<string>(variant)) {
-		assert(std::get<string>(variant) == find_str);
-		return 1;
-	} else if (std::holds_alternative<Queue<string>>(variant)) {
-		printf("Queue length: %d\n", std::get<Queue<string>>(variant).length());
-		int comparisons = std::get<Queue<string>>(variant).search(find_str);
-        assert(comparisons != -1);//Assume the item exists
-		return 1 + comparisons;//get + chaining
+	switch (tag) {
+		case Tag::Empty:
+			return -1; //not found
+		case Tag::Str:
+			return (str == find_str) ? 1 : -1;
+		case Tag::Queue:
+			return 1 + queue.search(find_str);
 	}
-    return -1;//satisfy the compiler
+	return -1; //unreachable
 }
