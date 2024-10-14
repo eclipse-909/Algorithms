@@ -1,0 +1,533 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CMPT 435L 112
+% Fall Semester
+% Assignment 2
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from: http://www.LaTeXTemplates.com
+% Original author: % Frits Wenneker (http://www.howtotex.com)
+% License: CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+% Modified by Alan G. Labouseur  - alan@labouseur.com
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[letterpaper, 10pt,DIV=13]{scrartcl}
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm,xfrac} % Math packages
+\usepackage{sectsty} % Allows customizing section commands
+\usepackage{graphicx}
+\usepackage[lined,linesnumbered,commentsnumbered]{algorithm2e}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{lastpage}
+\usepackage{minted}
+
+\allsectionsfont{\normalfont\scshape} % Make all section titles in default font and small caps.
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{page \thepage\ of \pageref{LastPage}} % Page numbering for right footer
+
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs.
+
+\binoppenalty=3000
+\relpenalty=3000
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{
+   \normalfont \normalsize
+   \textsc{CMPT 435L 112 - Fall 2024 - Dr. Labouseur} \\[10pt] % Header stuff.
+   \horrule{0.5pt} \\[0.25cm] 	% Top horizontal rule
+   \huge Assignment Two  \\     	    % Assignment title
+   \horrule{0.5pt} \\[0.25cm] 	% Bottom horizontal rule
+}
+
+\author{Ethan Morton \\ \normalsize Ethan.Morton1@Marist.edu}
+
+\date{\normalsize\today} 	% Today's date.
+
+\begin{document}
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%   start PROBLEM ONE
+%----------------------------------------------------------------------------------------
+\section{Setting Up the Scenario}
+\subsection{Reading from magicitems.txt}
+
+The lines in magicitems.txt are loaded into the lines array at runtime.
+NUM\_LINES is defined as 666.
+
+main.cpp
+\begin{minted}[linenos=true, firstnumber=83, fontsize=\large, breaklines]{C++}
+int main() {
+    //Read lines from magicitems.txt
+    std::ifstream file("../magicitems.txt");
+    if (!file.is_open()) {
+        printf("Unable to open file\n");
+        return 1;
+    }
+    string lines[NUM_LINES];
+    string line;
+    int index = 0;
+    while (std::getline(file, line)) {
+        lines[index] = line;
+        index++;
+    }
+    file.close();
+
+    //...
+}
+\end{minted}
+
+\subsection{Picking 42 random items}
+
+The lines array is first shuffled using the Knuth shuffle algorithm.
+
+main.cpp
+\begin{minted}[linenos=true, firstnumber=71, fontsize=\large, breaklines]{C++}
+void knuthShuffle(string* arr, const int size) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    //count backwards from the array
+    for (int i = size - 1; i > 0; i--) {
+        //pick a random index in the array and swap the element with the element at i
+        std::uniform_int_distribution dist(0, i);
+        const int ii = dist(gen);
+        swap(arr[i], arr[ii]);
+    }
+}
+\end{minted}
+
+The first 42 items of the shuffled lines array are copied into a new array called rand42.
+NUM\_RAND is defined as 42.
+
+main.cpp
+\begin{minted}[linenos=true, firstnumber=96, fontsize=\large, breaklines]{C++}
+int main() {
+    //...
+
+    //Get 42 random items
+    string rand42[NUM_RAND];
+    knuthShuffle(lines, NUM_LINES);
+    for (int i = 0; i < NUM_RAND; i++) {
+        rand42[i] = lines[i];
+    }
+    mergeSort(lines, NUM_LINES);
+
+    //...
+}
+\end{minted}
+
+Then the lines array is sorted via the merge sort algorithm.
+
+main.cpp
+\begin{minted}[linenos=true, firstnumber=14, fontsize=\large, breaklines]{C++}
+int mergeSortHelper(string* arr, const int left, const int right) {
+    if (left >= right) {
+        return 0;
+    }
+    int comparisons = 0;
+    const int mid = left + (right - left) / 2;
+    //merge sort on left side of array
+    comparisons += mergeSortHelper(arr, left, mid);
+    //merge sort on right side of array
+    comparisons += mergeSortHelper(arr, mid + 1, right);
+    //divide into left and right temp arrays
+    const int leftArrLen = mid - left + 1;
+    const int rightArrLen = right - mid;
+    std::vector<string> leftArr = std::vector<string>(leftArrLen);
+    std::vector<string> rightArr = std::vector<string>(rightArrLen);
+    // string leftArr[leftArrLen];//the stack won't be happy about this
+    // string rightArr[rightArrLen];
+    for (int i = 0; i < leftArrLen; i++) {
+        leftArr[i] = arr[left + i];
+    }
+    for (int i = 0; i < rightArrLen; i++) {
+        rightArr[i] = arr[mid + 1 + i];
+    }
+    //compare and sort
+    int i = 0, ii = 0, iii = left;
+    while (i < leftArrLen && ii < rightArrLen) {
+        comparisons++;
+        if (leftArr[i] <= rightArr[ii]) {
+            arr[iii] = leftArr[i];
+            i++;
+        } else {
+            arr[iii] = rightArr[ii];
+            ii++;
+        }
+        iii++;
+    }
+    comparisons++;//A comparison is made when the while loop stops
+    //merge back together
+    while (i < leftArrLen) {
+        arr[iii] = leftArr[i];
+        i++;
+        iii++;
+    }
+    while (ii < rightArrLen) {
+        arr[iii] = rightArr[ii];
+        ii++;
+        iii++;
+    }
+    return comparisons;
+}
+
+//Time complexity O(nlog2(n))
+//Specifically it's slightly better on average
+int mergeSort(string* arr, const int size) {
+    return mergeSortHelper(arr, 0, size - 1);
+}
+\end{minted}
+
+\section{Linear Search}
+
+A linear search is performed over the lines array to check if each of the 42 random items are in the array.
+The number of comparisons is tracked and printed for each of the 42 items. Then the average is printed for all
+42 items. The linear search goes through the lines array one at a time to check if the item is equal to the
+target item. Since the 42 items were randomly chosen, we should expect the 42 items to be evenly distributed
+within the lines array. Therefore we should expect the average number of comparisons to be equal to half of
+the length of the list, or $n/2$. $666/2=333$, which is close to the observed average of 334.2 over 5 samples.
+It should be half because a linear search can stop when it finds the item. Since it's evenly distributed, the
+average value of the 42 items should be roughly equal to the average value of all items. Linear search has an
+asymptotic running time of $O(n/2) = O(n)$.
+
+main.cpp
+\begin{minted}[linenos=true, firstnumber=104, fontsize=\large, breaklines]{C++}
+int main() {
+    //...
+
+    //Linear search
+    int comparisons = 0;
+    int totalComparisons = 0;
+    for (const string& rand : rand42) {
+        for (const string& ln : lines) {
+            comparisons++;
+            if (rand == ln) {
+                break;//It's assumed that the target string will be found
+            }
+        }
+        if constexpr (PRINT_EACH_ITEM) {
+            printf("Linear search comparisons for %s: %d\n", rand.c_str(), comparisons);
+        }
+        totalComparisons += comparisons;
+        comparisons = 0;
+    }
+    printf("Linear search average comparisons: %.2f\n", static_cast<float>(totalComparisons) / static_cast<float>(NUM_RAND));
+
+    //...
+}
+\end{minted}
+
+\section{Binary Search}
+
+A binary search is performed over the same arrays. The comparisons are tracked and printed, same as with
+linear search. I chose to use iteration instead of recursion for this implementation of binary search.
+The binary search divides the lines array in half until the item in the middle matches the target. This gives the
+asymptotic running time of $O(log_2(n))$. Since we are dividing by 2, we expect that in the worst case, the
+number of comparisons should be $log_2(n)$. $log_2(666)=9.379...$, which is a little higher than the
+observed average of 8.14 over 5 samples. The reason it's slightly lower is because that is worst case. The
+best case is O(1), so we should expect some elements to be found quickly. There is a 1/666 chance at finding
+the item at depth=0, a 2/332 chance at finding the item at depth=1, and at depth=d, the chance is given by
+the following equation:
+\begin{equation}
+\frac{2^d}{\left(\frac{666}{d+1}\right) - d}
+\end{equation}
+At any given depth, you have to subtract the chances for all the previous depths because the item did not exist
+at that depth, so we can rewrite the equation:
+\begin{equation}
+\frac{2^d}{\left(\frac{666}{d+1}\right) - d} - \sum_{n=0}^{d-1} \frac{2^n}{\left(\frac{666}{n+1}\right) - n}
+\end{equation}
+At approx. $d=7.028$, the chance of finding the item is .5 or 50\%. Even if d=0, we still have to count the initial
+comparison, so the number of $comparisons=d+1$, which means there should be 8.028 comparisons to find the item
+50\% of the time. 8.028 is much closer to the observed value of 8.14. Keep in mind only 5 samples were taken.
+More samples would likely have made the observed average closer to 8.028.
+
+main.cpp
+\begin{minted}[linenos=true, firstnumber=122, fontsize=\large, breaklines]{C++}
+int main() {
+    //...
+
+    //Binary search
+    //That's right, I did it without recursion. Stay mad Haskell developers!
+    totalComparisons = 0;
+    int left, right, mid;
+    for (const string& rand : rand42) {
+        left = 0;
+        right = NUM_LINES - 1;
+        while (left <= right) {
+            comparisons++;
+            mid = (left + right) / 2;
+            if (rand == lines[mid]) {
+                break;//It's assumed that the target string will be found
+            }
+            if (rand < lines[mid]) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        if constexpr (PRINT_EACH_ITEM) {
+            printf("Binary search comparisons for %s: %d\n", rand.c_str(), comparisons);
+        }
+        totalComparisons += comparisons;
+        comparisons = 0;
+    }
+    printf("Binary search average comparisons: %.2f\n", static_cast<float>(totalComparisons) / static_cast<float>(NUM_RAND));
+
+    //...
+}
+\end{minted}
+
+\section{Hash Table}
+\subsection{Hash Table implementation}
+
+The HashTable struct is implemented with an array of Buckets of size 250, and a static hashing function.
+This HashTable only works with strings. This implementation uses chaining to handle collisions.
+It comes with a method to insert a new string, and search for an existing string. The search function returns
+how many comparisons where made to find the string, or a non-positive number if it doesn't exist.
+
+To insert 666 items into a HashTable with 250 buckets, there must necessarily be collisions. If we assume that
+all 666 items were evenly distributed in each buckets, then each bucket should have $666/250=2.664$ items, which is
+a little bit less than the observed average of 3.21 over 5 samples. The reason for this discrepancy is that 2.664
+items per bucket is the best case scenario, where there are no empty buckets. In reality, it is very unlikely for
+there to be no empty buckets. Some buckets will be empty, and some queues will have more than 2.664 items. When we
+search for an item that we know is in the hash table, we will never come across a bucket that is empty during the
+search. If we assume there are fewer than 666 buckets with items in them, there will necessarily be a higher
+average number of items per bucket than 2.664 among buckets with items, because it has to compensate for the empty
+buckets. In buckets with multiple items, we would expect the number of comparisons to be half of the number
+of items in the bucket because it uses a linear search, which would imply that there are around 6.42 items
+per bucket. We can calculate the efficiency of the hash function with the following equation:
+\begin{equation}
+\text{Efficiency} = \left( \frac{\text{Ideal Average Items per Bucket}}{\text{Actual Average Items per Non-empty Bucket}} \right) \times 100
+\end{equation}
+With our values:
+\begin{equation}
+\text{41.5\%} = \left( \frac{\text{2.664}}{\text{6.42}} \right) \times 100
+\end{equation}
+41.5\% efficiency isn't very good for a hashing function, but it could be worse.
+
+hashtable.hpp
+\begin{minted}[linenos=true, firstnumber=35, fontsize=\large, breaklines]{C++}
+struct HashTable {
+    void insert(const string& new_str);
+
+    ///Returns how many comparisons were used to check if the string is in the hash table.
+    ///Returns 0 if it doesn't exist.
+    int search(const string& find_str) const;
+
+private:
+    static int hash(string value);
+
+    Bucket arr[HASHTABLE_SIZE];//hopefully the stack is cool with me dumping 10,000 bytes on it
+};
+\end{minted}
+
+The insert and search functions call the hash function to obtain the index in the Bucket array, then insertion
+or search logic is delegated to the Bucket's insert or search method.
+
+The hash function converts all characters to upper case, then sums the ASCII value of each character. The index
+returned is the remainder of the sum divided by the size of the hash table.
+
+hashtable.cpp
+\begin{minted}[linenos=true, firstnumber=7, fontsize=\large, breaklines]{C++}
+void HashTable::insert(const string& new_str) {arr[hash(new_str)].insert(new_str);}
+int HashTable::search(const string& find_str) const {return arr[hash(find_str)].search(find_str);}
+
+int HashTable::hash(string value) {
+    int letterTotal = 0;
+    std::transform(value.begin(), value.end(), value.begin(), [](const unsigned char c){return std::toupper(c);});
+    for (int i = 0; i < value.length(); i++) {
+        letterTotal += static_cast<int>(value.at(i));
+    }
+    return letterTotal % HASHTABLE_SIZE;
+}
+\end{minted}
+
+\subsection{Bucket implementation}
+
+The Bucket struct is a tagged union which represents one of three variants: Empty, Str, and Queue.
+Str means the bucket only has one string, and Queue means the bucket has a linked list of strings.
+
+hashtable.hpp
+\begin{minted}[linenos=true, firstnumber=12, fontsize=\large, breaklines]{C++}
+enum class Tag {Empty, Str, Queue};
+///Tagged union for either an empty bucket, one string, or a linked list of strings.
+///I was going to use std::variant, but I can't link with it, so now I have to make my own tagged union.
+struct Bucket {
+    Tag tag;
+    union {
+        string str;
+        Queue<string> queue;
+    };
+
+    Bucket();
+    ~Bucket();
+
+    ///If the bucket is empty, it will insert the new_str.
+    ///If the bucket has a string, it will turn it into a linked list with the old string + new_str.
+    ///If the bucket has a linked list, it will add new_str to the end.
+    void insert(const string& new_str);
+
+    ///Returns how many comparisons were used to check if the string is in the bucket.
+    ///Returns <= 0 if not found.
+    int search(const string& str) const;
+};
+\end{minted}
+
+In Bucket::insert, it uses the tag to determine how to insert the new string into the bucket. If it's Empty,
+it sets str to the new string and updates the tag to Str. If it's Str, it creates a queue and adds the existing
+string and the new string to that queue, and updates the tag to Queue. If it's Queue, it simply enqueues the new
+string.
+
+hashtable.cpp
+\begin{minted}[linenos=true, firstnumber=31, fontsize=\large, breaklines]{C++}
+void Bucket::insert(const string& new_str) {
+    switch (tag) {
+        case Tag::Empty:
+            tag = Tag::Str;
+            new (&str) string(new_str);
+            break;
+        case Tag::Str: {
+            std::string copy = std::move(str);
+            str.~string();
+            tag = Tag::Queue;
+            new (&queue) Queue<string>();
+            queue.enqueue(copy);
+            queue.enqueue(new_str);
+            break;
+        }
+        case Tag::Queue:
+            queue.enqueue(new_str);
+    }
+}
+\end{minted}
+
+In Bucket::search, it uses the tag to determine how to search for the target string. If it can't find the target
+string, a non-positive integer is returned (either 0 or -1). If it's Str, it just returns 1 because 1 comparison
+was made. If it's Queue, it delegates the search logic to the search method for Queue, and adds 1 for the initial
+comparison.
+
+hashtable.cpp
+\begin{minted}[linenos=true, firstnumber=51, fontsize=\large, breaklines]{C++}
+int Bucket::search(const string& find_str) const {
+    switch (tag) {
+        case Tag::Empty:
+            return -1; //not found
+        case Tag::Str:
+            assert(str == find_str);
+            return 1;
+        case Tag::Queue:
+            return 1 + queue.search(find_str);
+    }
+    return -1; //unreachable
+}
+\end{minted}
+
+\subsection{Queue implementation}
+
+The Queue struct is a stripped-down queue with methods only required by this program. It uses a linked list
+implementation and uses a template for generic types, but only uses string in this program.
+
+Queue::search uses a linear search to go through each element in the linked list until the item is found.
+It returns the number of comparisons, or -1 if the item was not found.
+
+queue.hpp
+\begin{minted}[linenos=true, firstnumber=6, fontsize=\large, breaklines]{C++}
+///First in, first out data structure with linked-list implementation.
+///For this project, this queue will be used more like a regular linked list,
+///and has some linked list methods instead of queue methods.
+template<typename T> struct Queue {
+private:
+    Node<T>* head;
+    Node<T>* tail;
+
+public:
+    /// Creates an empty queue.
+    Queue() : head(nullptr), tail(nullptr) {}
+
+    /// Deallocates all allocated nodes from the heap.
+    ~Queue() {
+        while (head != nullptr) {
+            Node<T>* next = head->next;
+            delete head;
+            head = next;
+        }
+    }
+
+    /// Adds the item to the tail of the queue.
+    void enqueue(const T& item) noexcept {
+        if (head == nullptr) {
+            head = tail = new Node<T>(item);
+            return;
+        }
+        tail->next = new Node<T>(item);
+        tail = tail->next;
+    }
+
+    ///Returns how many comparisons were used to check if the target is in the queue.
+    ///Returns -1 if it doesn't exist.
+    int search(const T& target) const {
+        int comparisons = 0;
+        Node<T>* curr = head;
+        while (curr != nullptr) {
+            comparisons++;
+            if (curr->data == target) {
+                return comparisons;
+            }
+            curr = curr->next;
+        }
+        return -1;
+    }
+};
+\end{minted}
+
+\subsection{Node implementation}
+
+The Node struct is the container for each element in a linked list. It uses a template for generic types, but only
+string is used in this program. It holds some data, and a pointer to the next element in the list.
+
+node.hpp
+\begin{minted}[linenos=true, firstnumber=4, fontsize=\large, breaklines]{C++}
+/// Node for linked-list-style data structures.
+/// Data structures are responsible for cleaning up resources used by Nodes.
+template<typename T> struct Node {
+    T data;
+    Node* next;
+
+    explicit Node(const T& item, Node* next = nullptr) : data(item), next(next) {}
+};
+\end{minted}
+
+\end{document}

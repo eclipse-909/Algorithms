@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <cassert>
 
 #include "hashtable.hpp"
 
@@ -52,7 +53,8 @@ int Bucket::search(const string& find_str) const {
 		case Tag::Empty:
 			return -1; //not found
 		case Tag::Str:
-			return (str == find_str) ? 1 : -1;
+			assert(str == find_str);
+			return 1;
 		case Tag::Queue:
 			return 1 + queue.search(find_str);
 	}

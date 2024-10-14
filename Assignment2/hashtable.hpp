@@ -42,7 +42,7 @@ struct HashTable {
 private:
 	static int hash(string value);
 
-	Bucket arr[HASHTABLE_SIZE];
+	Bucket arr[HASHTABLE_SIZE];//hopefully the stack is cool with me dumping 10,000 bytes on it
 };
 
 #endif //HASHMAP_HPP

@@ -9,6 +9,7 @@
 
 #define NUM_LINES 666
 #define NUM_RAND 42
+#define PRINT_EACH_ITEM true
 
 int mergeSortHelper(string* arr, const int left, const int right) {
 	if (left >= right) {
@@ -113,7 +114,9 @@ int main() {
 				break;//It's assumed that the target string will be found
 			}
 		}
-		printf("Linear search comparisons for %s: %d\n", rand.c_str(), comparisons);
+		if constexpr (PRINT_EACH_ITEM) {
+			printf("Linear search comparisons for %s: %d\n", rand.c_str(), comparisons);
+		}
 		totalComparisons += comparisons;
 		comparisons = 0;
 	}
@@ -126,7 +129,7 @@ int main() {
 	for (const string& rand : rand42) {
 		left = 0;
 		right = NUM_LINES - 1;
-		while (left < right) {
+		while (left <= right) {
 			comparisons++;
 			mid = (left + right) / 2;
 			if (rand == lines[mid]) {
@@ -138,13 +141,15 @@ int main() {
 				left = mid + 1;
 			}
 		}
-		printf("Binary search comparisons for %s: %d\n", rand.c_str(), comparisons);
+		if constexpr (PRINT_EACH_ITEM) {
+			printf("Binary search comparisons for %s: %d\n", rand.c_str(), comparisons);
+		}
 		totalComparisons += comparisons;
 		comparisons = 0;
 	}
 	printf("Binary search average comparisons: %.2f\n", static_cast<float>(totalComparisons) / static_cast<float>(NUM_RAND));
 
-	//hash table
+	//Hash table
 	HashTable table = HashTable();
 	for (const string& ln : lines) {
 		table.insert(ln);
@@ -154,7 +159,9 @@ int main() {
 		comparisons = table.search(str);
 		assert(comparisons > 0);//We expect to find the item since we just inserted it
 		totalComparisons += comparisons;
-		printf("HashTable retrieval comparisons for %s: %d\n", str.c_str(), comparisons);
+		if constexpr (PRINT_EACH_ITEM) {
+			printf("HashTable retrieval comparisons for %s: %d\n", str.c_str(), comparisons);
+		}
 	}
 	printf("HashTable search average comparisons: %.2f\n", static_cast<float>(totalComparisons) / static_cast<float>(NUM_RAND));
 

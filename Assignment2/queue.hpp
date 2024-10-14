@@ -48,16 +48,6 @@ public:
 		}
 		return -1;
 	}
-
-	int length() const {
-		int length = 0;
-		Node<T>* curr = head;
-		while (curr != nullptr) {
-			length++;
-			curr = curr->next;
-		}
-		return length;
-	}
 };
 
 #endif //QUEUE_HPP
