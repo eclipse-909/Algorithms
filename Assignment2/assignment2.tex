@@ -218,10 +218,11 @@ The number of comparisons is tracked and printed for each of the 42 items. Then 
 42 items. The linear search goes through the lines array one at a time to check if the item is equal to the
 target item. Since the 42 items were randomly chosen, we should expect the 42 items to be evenly distributed
 within the lines array. Therefore we should expect the average number of comparisons to be equal to half of
-the length of the list, or $n/2$. $666/2=333$, which is close to the observed average of 334.2 over 5 samples.
-It should be half because a linear search can stop when it finds the item. Since it's evenly distributed, the
-average value of the 42 items should be roughly equal to the average value of all items. Linear search has an
-asymptotic running time of $O(n/2) = O(n)$.
+the length of the list, or $n/2$. $666/2=333$, which is close to the observed average of 329.471 over 10 samples.
+It should be half because a linear search can stop when it finds the item. This gives us an asymptotic running
+time of $O(n/2) = O(n)$. The n comes from having to search through each element in the array, one-at-a-time.
+Since it's evenly distributed, the average value of the 42 items should be roughly equal to the average value
+of all items.
 
 main.cpp
 \begin{minted}[linenos=true, firstnumber=104, fontsize=\large, breaklines]{C++}
@@ -254,25 +255,21 @@ int main() {
 
 A binary search is performed over the same arrays. The comparisons are tracked and printed, same as with
 linear search. I chose to use iteration instead of recursion for this implementation of binary search.
+
 The binary search divides the lines array in half until the item in the middle matches the target. This gives the
 asymptotic running time of $O(log_2(n))$. Since we are dividing by 2, we expect that in the worst case, the
 number of comparisons should be $log_2(n)$. $log_2(666)=9.379...$, which is a little higher than the
-observed average of 8.14 over 5 samples. The reason it's slightly lower is because that is worst case. The
-best case is O(1), so we should expect some elements to be found quickly. There is a 1/666 chance at finding
-the item at depth=0, a 2/332 chance at finding the item at depth=1, and at depth=d, the chance is given by
-the following equation:
+observed average of 8.092 over 10 samples. The reason it's slightly higher is because that is worst case. For the
+average case, we should expect some elements to be found quickly. There is a 1/666 chance at finding
+the item after 1 comparison, a 2/666 chance at finding the item after 2 comparisons, a 4/666 chance of finding
+the item after 3 comparisons, and a $2^{c-1}/666$ chance at finding the item after $c$ comparisons. The maximum
+number of comparisons is $log_2(n)$ so we can sum all the chances from $c=1$ to $c=log_2(n)$. This gives us a
+total number of comparisons of $n(log_2(n)-1)+1$. Divide this by the number of cases $n+1$, and we get the
+following equation for average number of comparisons:
 \begin{equation}
-\frac{2^d}{\left(\frac{666}{d+1}\right) - d}
+\frac{n\left(log_2\left(n\right)-1\right)+1}{n+1}
 \end{equation}
-At any given depth, you have to subtract the chances for all the previous depths because the item did not exist
-at that depth, so we can rewrite the equation:
-\begin{equation}
-\frac{2^d}{\left(\frac{666}{d+1}\right) - d} - \sum_{n=0}^{d-1} \frac{2^n}{\left(\frac{666}{n+1}\right) - n}
-\end{equation}
-At approx. $d=7.028$, the chance of finding the item is .5 or 50\%. Even if d=0, we still have to count the initial
-comparison, so the number of $comparisons=d+1$, which means there should be 8.028 comparisons to find the item
-50\% of the time. 8.028 is much closer to the observed value of 8.14. Keep in mind only 5 samples were taken.
-More samples would likely have made the observed average closer to 8.028.
+Substituting 666 for n, the equation evaluates to 8.368, which is closer to the observed average of 8.092.
 
 main.cpp
 \begin{minted}[linenos=true, firstnumber=122, fontsize=\large, breaklines]{C++}
@@ -314,29 +311,29 @@ int main() {
 \subsection{Hash Table implementation}
 
 The HashTable struct is implemented with an array of Buckets of size 250, and a static hashing function.
-This HashTable only works with strings. This implementation uses chaining to handle collisions.
+This hash table only works with strings. This implementation uses chaining to handle collisions.
 It comes with a method to insert a new string, and search for an existing string. The search function returns
 how many comparisons where made to find the string, or a non-positive number if it doesn't exist.
 
-To insert 666 items into a HashTable with 250 buckets, there must necessarily be collisions. If we assume that
+To insert 666 items into a hash table with 250 buckets, there must necessarily be collisions. If we assume that
 all 666 items were evenly distributed in each buckets, then each bucket should have $666/250=2.664$ items, which is
-a little bit less than the observed average of 3.21 over 5 samples. The reason for this discrepancy is that 2.664
+a little bit less than the observed average of 3.423 over 10 samples. The reason for this discrepancy is that 2.664
 items per bucket is the best case scenario, where there are no empty buckets. In reality, it is very unlikely for
 there to be no empty buckets. Some buckets will be empty, and some queues will have more than 2.664 items. When we
 search for an item that we know is in the hash table, we will never come across a bucket that is empty during the
 search. If we assume there are fewer than 666 buckets with items in them, there will necessarily be a higher
 average number of items per bucket than 2.664 among buckets with items, because it has to compensate for the empty
 buckets. In buckets with multiple items, we would expect the number of comparisons to be half of the number
-of items in the bucket because it uses a linear search, which would imply that there are around 6.42 items
+of items in the bucket because it uses a linear search, which would imply that there are around 6.846 items
 per bucket. We can calculate the efficiency of the hash function with the following equation:
 \begin{equation}
 \text{Efficiency} = \left( \frac{\text{Ideal Average Items per Bucket}}{\text{Actual Average Items per Non-empty Bucket}} \right) \times 100
 \end{equation}
 With our values:
 \begin{equation}
-\text{41.5\%} = \left( \frac{\text{2.664}}{\text{6.42}} \right) \times 100
+\text{38.9\%} = \left( \frac{\text{2.664}}{\text{6.846}} \right) \times 100
 \end{equation}
-41.5\% efficiency isn't very good for a hashing function, but it could be worse.
+38.9\% efficiency isn't very good for a hashing function, but I suppose it could be worse.
 
 hashtable.hpp
 \begin{minted}[linenos=true, firstnumber=35, fontsize=\large, breaklines]{C++}
