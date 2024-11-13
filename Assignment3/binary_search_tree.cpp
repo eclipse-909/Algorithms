@@ -56,8 +56,8 @@ void traverse_helper(Node* curr) {
 	traverse_helper(curr->right);
 }
 
-void BinarySearchTree::in_order_traverse() const {
-	printf("In-order traversal");
+void BinarySearchTree::depth_first_traverse() const {
+	printf("Depth-first traversal");
 	traverse_helper(root);
 }
 

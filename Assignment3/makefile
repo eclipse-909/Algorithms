@@ -2,7 +2,7 @@
 CXX = g++
 CXXFLAGS = -std=c++20
 SRCS = main.cpp binary_search_tree.cpp
-DEPS = binary_search_tree.hpp
+DEPS = binary_search_tree.hpp graph.hpp
 TARGET = Assignment3
 BIN_DIR = .
 

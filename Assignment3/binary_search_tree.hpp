@@ -21,7 +21,7 @@ struct BinarySearchTree {
 	~BinarySearchTree();
 
 	void insert(string data);
-	void in_order_traverse() const;
+	void depth_first_traverse() const;
 	int search(string target) const;
 };
 
