@@ -30,7 +30,7 @@ void print_graphs(const Graph<Matrix>* graph_m, const Graph<AdjList>* graph_al, 
 
 int main(int argc, char* argv[]) {
 	//Make a list of all the graph files to use
-	vector<string> graph_files = vector<string>();
+	vector<string> graph_files;
 	if (argc == 1) {
 		graph_files.emplace_back("./graphs1.txt");
 	} else {
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
 		fprintf(stderr, "Unable to open magicitems.txt\n");
 		return 1;
 	}
-	BinarySearchTree bst = BinarySearchTree();
+	BinarySearchTree bst;
 	while (std::getline(magicitems, line)) {
 		bst.insert(line);
 	}

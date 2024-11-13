@@ -21,29 +21,21 @@ struct Graph {
 	void add_edge(const string& id0, const string& id1);
 };
 
-using Matrix = vector<vector<uint8_t>>;
+using Matrix = vector<vector<bool>>;
 
 //Graph with Matrix.
+//Uses a vector<bool> which uses the memory optimization with bit manipulation.
 //Since it's undirected, the matrix is not square. In fact, it's more of a triangle. The diagram below shows a possible matrix.
-//"." represents no edge, "1" represents an edge, "X"s are unused bits, row and column represent the index of the vertex given by the lookup table.
-//Instead of using a vector of booleans, this uses a vector of uint8_t where all 8 bits could be used. This is more memory efficient.
-//   0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15
-// 0 .  X  X  X  X  X  X  X
-// 1 .  1  X  X  X  X  X  X
-// 2 .  .  .  X  X  X  X  X
-// 3 .  .  1  .  X  X  X  X
-// 4 .  .  1  .  .  X  X  X
-// 5 .  .  .  .  .  .  X  X
-// 6 .  1  .  1  .  .  .  X
+//"." represents no edge, "1" represents an edge, row and column represent the vertex ID.
+//   0  1  2  3  4  5  6  7
+// 0 .
+// 1 .  1
+// 2 .  .  .
+// 3 .  .  1  .
+// 4 .  .  1  .  .
+// 5 .  .  .  .  .  .
+// 6 .  1  .  1  .  .  .
 // 7 .  .  .  .  .  1  .  .
-// 8 .  1  .  .  .  .  .  .  1  X  X  X  X  X  X  X
-// 9 .  .  .  1  .  .  .  .  .  .  X  X  X  X  X  X
-//10 .  .  .  .  .  .  1  .  .  .  .  X  X  X  X  X
-//11 .  .  1  .  .  .  .  .  .  .  .  .  X  X  X  X
-//12 .  .  .  .  .  .  .  .  .  .  .  1  .  X  X  X
-//13 .  .  .  1  .  .  .  .  1  .  .  .  .  .  X  X
-//14 .  1  .  .  .  1  .  .  .  .  .  1  .  .  .  X
-//15 1  .  .  .  .  .  .  .  .  .  .  .  .  .  .  1
 template<>
 struct Graph<Matrix> {
 	Matrix matrix;
@@ -52,7 +44,7 @@ struct Graph<Matrix> {
 	void add_vertex(const string& id) {
 		const int index = static_cast<int>(id_lookup.size());
 		id_lookup[id] = index;
-		vector<uint8_t> vec = vector<uint8_t>(matrix.size() / 8 + 1);
+		vector<bool> vec(matrix.size() + 1);
 		matrix.emplace_back(vec);
 	}
 	void add_edge(const string& id0, const string& id1) {
@@ -61,7 +53,7 @@ struct Graph<Matrix> {
 		if (r < c) {
 			std::swap(r, c);
 		}
-		matrix[r][c / 8] |= (0b10000000 >> (c % 8));
+		matrix[r][c] = true;
 	}
 
 	//Prints the matrix in the order given by the unordered_map.
@@ -104,27 +96,11 @@ private:
 				printf("%s ", pair.first.c_str());
 			}
 			//Print all bytes except the last
-			const vector<uint8_t>& row = matrix[pair.second];
-			for (int c = 0; c < row.size() - 1; c++) {//haha C++
-				for (uint8_t b = 0b10000000; b != 0; b >>= 1) {
-					if (const uint8_t bit = row[c] & b; bit == 0) {
-						printf(".  ");
-					} else {
-						printf("1  ");
-					}
-				}
-			}
-			//print the last byte
-			for (uint8_t b = 0b10000000, i = 0; b != 0; b >>= 1) {
-				if (i > pair.second % 8) {
-					printf("X  ");
-					continue;
-				}
-				i++;
-				if (const uint8_t bit = row[row.size() - 1] & b; bit == 0) {
-					printf(".  ");
-				} else {
+			for (const bool col : matrix[pair.second]) {//haha C++
+				if (col) {
 					printf("1  ");
+				} else {
+					printf(".  ");
 				}
 			}
 			printf("\n");
@@ -142,6 +118,8 @@ struct Graph<AdjList> {
 
 	void add_vertex(const string& id) {
 		id_lookup[id] = static_cast<int>(id_lookup.size());
+		// vector<uint8_t> vec = vector<uint8_t>(adj_list.size() / 8 + 1);
+		// adj_list.emplace_back(vec);
 		//TODO
 	}
 	void add_edge(const string& id0, const string& id1) {
