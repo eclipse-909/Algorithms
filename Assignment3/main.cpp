@@ -4,7 +4,12 @@
 #include <sstream>
 
 //#include <filesystem>
-#include <sys/stat.h>//replacement for filesystem since I can't link with it
+//replacement for filesystem since I can't link with it
+#include <sys/stat.h>
+//define stat for posix compatibility
+#ifdef _WIN32
+	#define stat _stat
+#endif
 
 #include "binary_search_tree.hpp"
 #include "graph.hpp"
@@ -30,9 +35,9 @@ int main(int argc, char* argv[]) {
 		graph_files.emplace_back("./graphs1.txt");
 	} else {
 		for (int i = 1; i < argc; i++) {
-			struct _stat buffer;
+			struct stat buffer;
 			// File exists and is a regular file
-			if (_stat(argv[i], &buffer) == 0 && (buffer.st_mode & S_IFREG) != 0) {
+			if (stat(argv[i], &buffer) == 0 && (buffer.st_mode & S_IFREG) != 0) {
 				graph_files.emplace_back(argv[i]);
 			} else {
 				fprintf(stderr, "Error - invalid file path: %s\n", argv[i]);
