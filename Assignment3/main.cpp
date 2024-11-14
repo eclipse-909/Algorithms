@@ -1,6 +1,5 @@
 #include <cstdio>
 #include <fstream>
-#include <vector>
 #include <sstream>
 
 //#include <filesystem>
@@ -18,7 +17,7 @@ using std::vector;
 
 void print_graphs(const Graph<Matrix>* graph_m, const Graph<AdjList>* graph_al, const Graph<vector<Vertex>>* graph_lo) {
 	printf("Graph with Matrix:\n");
-	graph_m->sorted_print();
+	graph_m->print();
 	printf("\nGraph with Adjacency List:\n");
 	graph_al->print();
 	printf("\nGraph with Linked Objects - Depth First:\n");

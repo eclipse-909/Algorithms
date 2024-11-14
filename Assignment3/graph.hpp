@@ -4,7 +4,6 @@
 #include <vector>
 #include <cstdint>
 #include <unordered_map>
-#include <algorithm>
 #include <queue>
 #include <unordered_set>
 
@@ -23,7 +22,7 @@ struct Graph {
 	void add_edge(const string& id0, const string& id1);
 };
 
-using Matrix = vector<vector<bool>>;
+using Matrix = vector<pair<string, vector<bool>>>;
 
 //Graph with Matrix.
 //Uses a vector<bool> which uses the memory optimization with bit manipulation.
@@ -46,8 +45,8 @@ struct Graph<Matrix> {
 	void add_vertex(const string& id) {
 		const int index = static_cast<int>(id_lookup.size());
 		id_lookup[id] = index;
-		vector<bool> vec(matrix.size() + 1);
-		matrix.emplace_back(vec);
+		pair<string, vector<bool>> p(id, vector<bool>(matrix.size() + 1));
+		matrix.emplace_back(p);
 	}
 
 	void add_edge(const string& id0, const string& id1) {
@@ -60,35 +59,13 @@ struct Graph<Matrix> {
 		if (r < c) {
 			std::swap(r, c);
 		}
-		matrix[r][c] = true;
+		matrix[r].second[c] = true;
 	}
 
-	//Prints the matrix in the order given by the unordered_map.
-	//This is done in n^2 time, but it looks hideous.
-	//Vertex IDs are assumed to be strings of length 1 or 2.
-	void quick_print() const {print(id_lookup);}
-
-	//Prints the matrix in the order they are listed in the file.
-	//This is also done in n^2 time, but it requires additional computation to sort, and it looks pretty.
-	//Vertex IDs are assumed to be strings of length 1 or 2.
-	void sorted_print() const {
-		vector<pair<string, int>> sortedPairs(id_lookup.begin(), id_lookup.end());
-		std::sort(
-			sortedPairs.begin(),
-			sortedPairs.end(),
-			[](const pair<string, int>& a, const pair<string, int>& b) {
-				return a.second < b.second;
-			}
-		);
-		print(sortedPairs);
-	}
-
-private:
-	template <typename Iterable>
-	void print(const Iterable& iter) const {
+	void print() const {
 		printf(" ");
 		//print X-axis vertex IDs
-		for (const auto& pair : iter) {
+		for (const pair<string, vector<bool>>& pair : matrix) {
 			if (pair.first.length() == 1) {
 				printf("  %s", pair.first.c_str());
 			} else {
@@ -97,15 +74,15 @@ private:
 		}
 		printf("\n");
 		//Print each row
-		for (const auto& pair : iter) {
+		for (const pair<string, vector<bool>>& pair : matrix) {
 			//print vertex ID
 			if (pair.first.length() == 1) {
 				printf(" %s ", pair.first.c_str());
 			} else {
 				printf("%s ", pair.first.c_str());
 			}
-			//Print all bytes except the last
-			for (const bool col : matrix[pair.second]) {
+			//Print edges
+			for (const bool col : pair.second) {
 				if (col) {
 					printf("1  ");
 				} else {
