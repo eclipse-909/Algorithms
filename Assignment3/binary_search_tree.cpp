@@ -57,8 +57,9 @@ void traverse_helper(Node* curr) {
 }
 
 void BinarySearchTree::depth_first_traverse() const {
-	printf("Depth-first traversal");
+	printf("Depth-first traversal:");
 	traverse_helper(root);
+	printf("\n");
 }
 
 int BinarySearchTree::search(const string target) const {

@@ -133,9 +133,11 @@ int main(int argc, char* argv[]) {
 		bst.insert(line);
 	}
 	magicitems.close();
+	printf("\n");
 
 	//print items in order
 	bst.depth_first_traverse();
+	printf("\n");
 
 	//Read lines from magicitems-find-in-bst.txt and search BST
 	std::ifstream file("./magicitems-find-in-bst.txt");

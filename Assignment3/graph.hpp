@@ -5,21 +5,20 @@
 #include <cstdint>
 #include <unordered_map>
 #include <algorithm>
-#include <tuple>
+#include <queue>
+#include <unordered_set>
 
 using std::vector;
 using std::unordered_map;
 using std::pair;
-using std::tuple;
+using std::queue;
+using std::unordered_set;
 
 //Base Graph
 //Has specific template specializations for Matrix, AdjList, and vector<Vertex>.
 //Cannot be used otherwise.
 template<typename Storage>
 struct Graph {
-	Storage storage;
-	unordered_map<string, int> id_lookup;
-
 	void add_vertex(const string& id);
 	void add_edge(const string& id0, const string& id1);
 };
@@ -106,7 +105,7 @@ private:
 				printf("%s ", pair.first.c_str());
 			}
 			//Print all bytes except the last
-			for (const bool col : matrix[pair.second]) {//haha C++
+			for (const bool col : matrix[pair.second]) {
 				if (col) {
 					printf("1  ");
 				} else {
@@ -118,9 +117,19 @@ private:
 	}
 };
 
-using AdjList = vector<tuple<string, vector<int>>>;
+using AdjList = vector<pair<string, vector<int>>>;
 
 //Graph with Adjacency List
+//This is an undirected graph, so printing the adjacency list will only show 1 edge between vertices.
+//Here is an example:
+// 0 |
+// 1 | 1
+// 2 |
+// 3 | 2
+// 4 | 2
+// 5 |
+// 6 | 1, 3
+// 7 | 5
 template<>
 struct Graph<AdjList> {
 	AdjList adj_list;
@@ -128,8 +137,8 @@ struct Graph<AdjList> {
 
 	void add_vertex(const string& id) {
 		id_lookup[id] = static_cast<int>(id_lookup.size());
-		vector<int> vec;
-		adj_list.emplace_back(std::make_tuple(id, vec));
+		pair<string, vector<int>> p(id, vector<int>());
+		adj_list.emplace_back(p);
 	}
 
 	void add_edge(const string& id0, const string& id1) {
@@ -146,12 +155,12 @@ struct Graph<AdjList> {
 	}
 
 	void print() const {
-		for (const tuple<string, vector<int>>& row : adj_list) {
+		for (const pair<string, vector<int>>& row : adj_list) {
 			//print vertex ID
-			printf("%s |", std::get<0>(row).c_str());
+			printf("%s |", row.first.c_str());
 			//print vertex ID of adjacent vertices
-			for (const int col : std::get<1>(row)) {
-				printf(" %s,", std::get<0>(adj_list[col]).c_str());
+			for (const int col : row.second) {
+				printf(" %s,", adj_list[col].first.c_str());
 			}
 			printf("\n");
 		}
@@ -159,7 +168,10 @@ struct Graph<AdjList> {
 };
 
 //Vertex for Graph with Linked Objects
-struct Vertex {vector<Vertex> neighbors;};
+struct Vertex {
+	string id;
+	vector<const Vertex*> neighbors;
+};
 
 //Graph with Linked Objects
 template<>
@@ -169,19 +181,55 @@ struct Graph<vector<Vertex>> {
 
 	void add_vertex(const string& id) {
 		id_lookup[id] = static_cast<int>(id_lookup.size());
-		//TODO
+		Vertex v = {id, vector<const Vertex*>()};
+		vertices.emplace_back(v);
 	}
 
 	void add_edge(const string& id0, const string& id1) {
-		//TODO
+		Vertex* v0 = &vertices[id_lookup[id0]];
+		Vertex* v1 = &vertices[id_lookup[id1]];
+		v0->neighbors.emplace_back(v1);
+		v1->neighbors.emplace_back(v0);
 	}
 
 	void print_breadth_first() const {
-		//TODO
+		if (vertices.empty()) {return;}
+		unordered_set<const Vertex*> processed;
+		queue<const Vertex*> q;
+		const Vertex* v0 = &vertices[0];
+		processed.insert(v0);
+		q.push(v0);
+		while (!q.empty()) {
+			const Vertex* curr = q.front();
+			q.pop();
+			printf("%s, ", curr->id.c_str());
+			for (const Vertex* n : curr->neighbors) {
+				if (!processed.contains(n)) {
+					q.push(n);
+					processed.insert(n);
+				}
+			}
+		}
+		printf("\n");
 	}
 
 	void print_depth_first() const {
-		//TODO
+		unordered_set<const Vertex*> processed;
+		dft(&vertices[0], &processed);
+		printf("\n");
+	}
+
+private:
+	void dft(const Vertex* v, unordered_set<const Vertex*>* processed) const {
+		if (!processed->contains(v)) {
+			printf("%s, ", v->id.c_str());
+			processed->insert(v);
+		}
+		for (const Vertex* n : v->neighbors) {
+			if (!processed->contains(n)) {
+				dft(n, processed);
+			}
+		}
 	}
 };
 
