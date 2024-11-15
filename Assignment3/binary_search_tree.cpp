@@ -49,7 +49,7 @@ void BinarySearchTree::insert(const string data) {
 	printf("\n");
 }
 
-void traverse_helper(Node* curr) {
+void traverse_helper(const Node* curr) {
 	if (curr == nullptr) {return;}
 	traverse_helper(curr->left);
 	printf(" - %s", curr->data.c_str());
@@ -65,7 +65,7 @@ void BinarySearchTree::depth_first_traverse() const {
 int BinarySearchTree::search(const string target) const {
 	printf("Searching %s - Root", target.c_str());
 	int comparisons = 0;
-	Node* curr = root;
+	const Node* curr = root;
 	while (curr != nullptr) {
 		comparisons++;
 		if (target == curr->data) {
@@ -78,5 +78,5 @@ int BinarySearchTree::search(const string target) const {
 			curr = curr->right;
 		}
 	}
-	return comparisons * -1;
+	return -1;
 }

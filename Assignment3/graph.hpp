@@ -128,7 +128,7 @@ struct Graph<AdjList> {
 		if (index0 < index1) {
 			std::swap(index0, index1);
 		}
-		std::get<1>(adj_list[index0]).emplace_back(index1);
+		adj_list[index0].second.emplace_back(index1);
 	}
 
 	void print() const {

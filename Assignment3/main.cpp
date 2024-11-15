@@ -148,12 +148,11 @@ int main(int argc, char* argv[]) {
 	int count = 0;
 	while (std::getline(file, line)) {
 		int c = bst.search(line);
-		if (c < 0) {
+		if (c == -1) {
 			fprintf(stderr, ", Not found after %d comparisons\n", c);
-			c *= -1;
-		} else {
-			printf(", Found after %d comparisons\n", c);
+			return 1;
 		}
+		printf(", Found after %d comparisons\n", c);
 		comparisons += c;
 		count++;
 	}
