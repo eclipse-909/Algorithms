@@ -8,7 +8,7 @@ using std::string;
 struct Spice {
 	string name;
 	float total_price;
-	int quantity;
+	float quantity;
 };
 
 #endif //SPICE_HPP

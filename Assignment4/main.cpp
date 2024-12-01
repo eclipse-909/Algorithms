@@ -103,6 +103,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	//Spice heist
+	printf("\n");
 	std::ifstream spice_file("spice.txt");
 	if (!spice_file.is_open()) {
 		fprintf(stderr, "Unable to open spice.txt\n");
@@ -110,7 +111,7 @@ int main(int argc, char* argv[]) {
 	}
 	int lineNum = 0;
 	vector<Spice> spices;
-	vector<int> knapsacks;//int represents the capacity of the knapsack
+	vector<float> knapsacks;//int represents the capacity of the knapsack
 	while (std::getline(spice_file, line)) {
 		lineNum++;
 		//ignore comments
@@ -129,7 +130,7 @@ int main(int argc, char* argv[]) {
 			string token;
 			string name;
 			float total_price;
-			int quantity;
+			float quantity;
 			while (std::getline(iss, token, ';')) {
 				std::istringstream pair_stream(token);
 				string key, value;
@@ -164,7 +165,7 @@ int main(int argc, char* argv[]) {
 					}
 				} else if (key == "qty") {
 					try {
-						quantity = std::stoi(value);
+						quantity = std::stof(value);
 					} catch (...) {
 						fprintf(stderr, "Error - Invalid qty in line %d\n", lineNum);
 						return 1;
@@ -189,11 +190,29 @@ int main(int argc, char* argv[]) {
 			return 1;
 		}
 	}
-	for (const Spice& s : spices) {
-		printf("spice name = %s; total_price = %.1f; qty = %d;\n", s.name.c_str(), s.total_price, s.quantity);
-	}
-	for (const int cap : knapsacks) {
-		printf("Knapsack capacity: %d\n", cap);
+	std::sort(spices.begin(), spices.end(), [](const Spice& a, const Spice& b) {
+		return a.total_price / a.quantity > b.total_price / b.quantity;
+	});
+	for (const float capacity : knapsacks) {
+		float remaining_cap = capacity;
+		float total_value = 0;
+		vector<Spice> spices_taken;
+		for (int i = 0; i < spices.size() && remaining_cap > 0; i++) {
+			Spice taken = spices[i];
+			float quantity = taken.quantity;
+			taken.quantity = std::min(quantity, remaining_cap);
+			remaining_cap -= taken.quantity;
+			total_value += taken.total_price * (taken.quantity / quantity);
+			spices_taken.emplace_back(taken);
+		}
+		printf("Knapsack of capacity %.1f is worth %.2f quatloos and contains ", capacity, total_value);
+		for (size_t i = 0; i < spices_taken.size(); i++) {
+			printf("%.1f scoops of %s", spices_taken[i].quantity, spices_taken[i].name.c_str());
+			if (i != spices.size() - 1) {
+				printf(", ");
+			}
+		}
+		printf("\n");
 	}
 
 	return 0;
