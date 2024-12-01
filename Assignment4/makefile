@@ -2,7 +2,7 @@
 CXX = g++
 CXXFLAGS = -std=c++20
 SRCS = main.cpp
-DEPS = graph.hpp
+DEPS = graph.hpp spice.hpp
 TARGET = Assignment4
 BIN_DIR = .
 
