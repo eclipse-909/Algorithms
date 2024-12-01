@@ -13,8 +13,6 @@
 #include "binary_search_tree.hpp"
 #include "graph.hpp"
 
-using std::vector;
-
 void print_graphs(const Graph<Matrix>* graph_m, const Graph<AdjList>* graph_al, const Graph<vector<Vertex>>* graph_lo) {
 	printf("Graph with Matrix:\n");
 	graph_m->print();
