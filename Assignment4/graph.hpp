@@ -22,6 +22,11 @@ struct Vertex {
 	int predecessor;
 
 	explicit Vertex(const int id) : id(id), neighbors(vector<pair<Vertex*, int>>()), distance(INT_MAX), predecessor(-1) {}
+
+	void reset() {
+		distance = INT_MAX;
+		predecessor = -1;
+	}
 };
 
 //Directed, Weighted graph with Linked Objects
@@ -64,6 +69,9 @@ struct Graph {
 	        for (const pair<Vertex*, int>& neighbor : vertex.neighbors) {
 				if (const int weight = neighbor.second; vertex.distance != INT_MAX && vertex.distance + weight < neighbor.first->distance) {
 					fprintf(stderr, "Graph contains a negative-weight cycle");
+					for (Vertex& v : vertices) {
+						v.reset();
+					}
 					return;
 	            }
 	        }
@@ -94,6 +102,9 @@ struct Graph {
 				}
 			}
 			printf("\n");
+		}
+		for (Vertex& v : vertices) {
+			v.reset();
 		}
 	}
 };
