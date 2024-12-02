@@ -51,8 +51,7 @@ struct Graph {
 		vertices[id_lookup[srcID]].distance = 0;
 
 	    // Relax edges V - 1 times
-	    const int V = static_cast<int>(vertices.size());
-	    for (int i = 0; i < V - 1; ++i) {
+	    for (int i = 0; i < vertices.size() - 1; i++) {
 	        for (Vertex& vertex : vertices) {
 	            for (const pair<Vertex*, int>& neighbor : vertex.neighbors) {
 					// Relaxation step

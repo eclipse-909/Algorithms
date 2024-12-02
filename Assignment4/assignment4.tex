@@ -1,0 +1,237 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CMPT 435L 112
+% Fall Semester
+% Assignment 4
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from: http://www.LaTeXTemplates.com
+% Original author: % Frits Wenneker (http://www.howtotex.com)
+% License: CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+% Modified by Alan G. Labouseur  - alan@labouseur.com
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[letterpaper, 10pt,DIV=13]{scrartcl} 
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm,xfrac} % Math packages
+\usepackage{sectsty} % Allows customizing section commands
+\usepackage{graphicx}
+\usepackage[lined,linesnumbered,commentsnumbered]{algorithm2e}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{lastpage}
+\usepackage{minted}
+
+\allsectionsfont{\normalfont\scshape} % Make all section titles in default font and small caps.
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{page \thepage\ of \pageref{LastPage}} % Page numbering for right footer
+
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs.
+
+\binoppenalty=3000
+\relpenalty=3000
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+   \normalfont \normalsize 
+   \textsc{CMPT 435L 112 - Fall 2024 - Dr. Labouseur} \\[10pt] % Header stuff.
+   \horrule{0.5pt} \\[0.25cm] 	% Top horizontal rule
+   \huge Assignment Four  \\     	    % Assignment title
+   \horrule{0.5pt} \\[0.25cm] 	% Bottom horizontal rule
+}
+
+\author{Ethan Morton \\ \normalsize Ethan.Morton1@Marist.edu}
+
+\date{\normalsize\today} 	% Today's date.
+
+\begin{document}
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%   start PROBLEM ONE
+%----------------------------------------------------------------------------------------
+\section{Graph}
+The graph has been modified since assignment 3. Now that linked objects are the only implementation for graphs, the Graph struct no longer uses template specializations, and it's just a graph with linked o objects. The Vertex struct has also been modified to make the Bellman-Ford algorithm more efficient and easier to write. Specifically, it now contains properties for distance and predecessor, which are both ints.
+
+graph.hpp
+\begin{minted}[linenos=true, firstnumber=16, fontsize=\large, breaklines]{C++}
+//Vertex for Graph with Linked Objects
+struct Vertex {
+    int id;
+    //pointer to adjacent vertex and weight
+    vector<pair<Vertex*, int>> neighbors;
+    int distance;
+    int predecessor;
+    
+    explicit Vertex(const int id) : id(id), neighbors(vector<pair<Vertex*, int>>()), distance(INT_MAX), predecessor(-1) {}
+
+    void reset() {
+        distance = INT_MAX;
+        predecessor = -1;
+    }
+};
+\end{minted}
+
+\subsection{Bellman-Ford Single-Source Shortest Path}
+
+This algorithm finds the shortest path from one vertex to another, by finding the minimum sum of the weights between the vertices in the path. All vertices have a distance of INT\_MAX (which represents infinity) and a predecessor of -1 (which represents no predecessor). The source vertex is initialized with a distance of 0 because it should cost nothing to get to itself.
+
+The next thing to do is to go over each edge in the graph and relax them. This is done by iterating over each neighbor of each vertex, and we have to do this $V-1$ times because the relaxation is different for each path. The algorithm for relaxation is for each edge, if the distance to the destination vertex via the current vertex is shorter than the known distance, the distance and predecessor of the destination vertex are updated.
+
+After relaxation, we have to check for negative weight cycles. If the weight from A to B is 2 and the weight from B to A is -5, then we could just keep cycling between A and B, and it would subtract 3 from the total cost each time we do it, and we could just do it infinitely many times. If this occurs, we just assume that the shortest path cannot be found. We again have to check each edge for a negative weight cycle, but we only have to do it once.
+
+Finally, we can print out all the shortest paths. We go through each vertex (except the source vertex), and loop through their predecessors until we get to the source vertex. During the loop, the vertex IDs are pushed to a vector. To print out the path, we iterate backwards through the vector to print each ID.
+
+When the function returns, either due to the detection of a negative weight cycle or completion of the algorithm, we need to reset the vertices so the graph can do this algorithm again.
+
+The time complexity of the algorithm is dominated by the relaxation step. It iterates over each neighbor of each vertex $V-1$ times. Although it uses a triple-nested loop, one of them is used to iterate over each vertex, and the other two combines is what lets us iterate over each edge in the entire graph. This gives a time complexity of $O(V*E)$.
+
+graph.hpp
+\begin{minted}[linenos=true, firstnumber=49, fontsize=\large, breaklines]{C++}
+void bellman_ford(const int srcID) {
+    // Initialize source vertex distance
+    vertices[id_lookup[srcID]].distance = 0;
+    
+    // Relax edges V - 1 times
+    for (int i = 0; i < vertices.size() - 1; i++) {
+        for (Vertex& vertex : vertices) {
+            for (const pair<Vertex*, int>& neighbor : vertex.neighbors) {
+                // Relaxation step
+                if (const int weight = neighbor.second; vertex.distance != INT_MAX && vertex.distance + weight < neighbor.first->distance) {
+                    neighbor.first->distance = vertex.distance + weight;
+                    neighbor.first->predecessor = vertex.id;
+                }
+            }
+        }
+    }
+
+    // Check for negative-weight cycles
+    for (const Vertex& vertex : vertices) {
+        for (const pair<Vertex*, int>& neighbor : vertex.neighbors) {
+            if (const int weight = neighbor.second; vertex.distance != INT_MAX && vertex.distance + weight < neighbor.first->distance) {
+                fprintf(stderr, "Graph contains a negative-weight cycle");
+                for (Vertex& v : vertices) {
+                    v.reset();
+                }
+                return;
+            }
+        }
+    }
+
+    // Print shortest paths
+    for (const Vertex& vertex : vertices) {
+        if (vertex.id == srcID) {
+            // Skip the source vertex
+            continue;
+        }
+        if (vertex.distance == INT_MAX) {
+            printf("%d --> %d cost is ∞; path: none\n", srcID, vertex.id);
+            continue;
+        }
+        // Reconstruct the path
+        vector<int> path;
+        for (int id = vertex.id; id != -1; id = vertices[id_lookup[id]].predecessor) {
+            path.push_back(id);
+        }
+
+        // Print the result
+        printf("%d --> %d cost is %d; path: ", srcID, vertex.id, vertex.distance);
+        for (int i = static_cast<int>(path.size()) - 1; i >= 0; i--) {
+            printf("%d", path[i]);
+            if (i > 0) {
+                printf(" --> ");
+            }
+        }
+        printf("\n");
+    }
+    for (Vertex& v : vertices) {
+        v.reset();
+    }
+}
+\end{minted}
+
+\section{Spice Heist}
+
+I created a spice struct to keep track of the information from spice.txt.
+
+spice.hpp
+\begin{minted}[linenos=true, firstnumber=8, fontsize=\large, breaklines]{C++}
+struct Spice {
+    string name;
+    float total_price;
+    float quantity;
+};
+\end{minted}
+
+Each spice is parsed and pushed to a vector. Then each knapsack is parsed, and the capacity is pushed to a vector of ints.
+
+To begin the algorithm, the spices vector is sorted by price per unit in descending order. This sort has a time complexity of $O(nlog_2(n))$. The reason for sorting is that in the fractional knapsack problem, you can take as much spice as you want until the pile runs out or the knapsack is at capacity. If the pile runs out and you still have capacity, then you can move on to the next pile. If the piles are sorted by price per unit, we can just iterate over the sorted spices and take from the most valuable piles first. When iterating, we need to keep track of how much space is left in the knapsack, and every time we take from a pile, we take the minimum value between how much spice is in the pile, and how much capacity is remaining. If we have taken the entire pile and there's capacity remaining, we move on to the next pile. If there is no capacity remaining, we break from the loop. This iteration has a time complexity of $O(n)$ since the worst case scenario requires that we iterate over each spice in the vector to fill a knapsack that can hold all the spice. We keep track of how much of each spice was taken, and it's printed out at the end. All this is done for each knapsack given in spice.txt.
+
+main.cpp
+\begin{minted}[linenos=true, firstnumber=190, fontsize=\large, breaklines]{C++}
+int main(int argc, char* argv[]) {
+
+    //...
+
+    std::sort(spices.begin(), spices.end(), [](const Spice& a, const Spice& b) {
+        return a.total_price / a.quantity > b.total_price / b.quantity;
+    });
+    for (const float capacity : knapsacks) {
+        float remaining_cap = capacity;
+        float total_value = 0;
+        vector<Spice> spices_taken;
+        for (int i = 0; i < spices.size() && remaining_cap > 0; i++) {
+            Spice taken = spices[i];
+            float quantity = taken.quantity;
+            taken.quantity = std::min(quantity, remaining_cap);
+            remaining_cap -= taken.quantity;
+            total_value += taken.total_price * (taken.quantity / quantity);
+            spices_taken.emplace_back(taken);
+        }
+        printf("Knapsack of capacity %.1f is worth %.2f quatloos and contains ", capacity, total_value);
+        for (size_t i = 0; i < spices_taken.size(); i++) {
+            printf("%.1f scoops of %s", spices_taken[i].quantity, spices_taken[i].name.c_str());
+            if (i != spices.size() - 1) {
+                printf(", ");
+            }
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
+\end{minted}
+
+\end{document}
