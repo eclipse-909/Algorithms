@@ -64,6 +64,7 @@ int main(int argc, char* argv[]) {
 				if (token == "graph") {
 					if (init) {
 						graph.bellman_ford(1);
+						printf("\n");
 					}
 					graph = Graph();
 					init = true;

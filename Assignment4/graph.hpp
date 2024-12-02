@@ -43,10 +43,9 @@ struct Graph {
 
 	void bellman_ford(const int srcID) {
 	    // Initialize source vertex distance
-	    Vertex* srcVertex = &vertices[id_lookup[srcID]];
-	    srcVertex->distance = 0;
+		vertices[id_lookup[srcID]].distance = 0;
 
-	    // Relax edges |V| - 1 times
+	    // Relax edges V - 1 times
 	    const int V = static_cast<int>(vertices.size());
 	    for (int i = 0; i < V - 1; ++i) {
 	        for (Vertex& vertex : vertices) {
@@ -82,16 +81,15 @@ struct Graph {
 			}
 			// Reconstruct the path
 			vector<int> path;
-			for (int at = vertex.id; at != -1; at = vertices[id_lookup[at]].predecessor) {
-				path.push_back(at);
+			for (int id = vertex.id; id != -1; id = vertices[id_lookup[id]].predecessor) {
+				path.push_back(id);
 			}
-			std::reverse(path.begin(), path.end());
 
 			// Print the result
 			printf("%d --> %d cost is %d; path: ", srcID, vertex.id, vertex.distance);
-			for (size_t i = 0; i < path.size(); ++i) {
+			for (int i = static_cast<int>(path.size()) - 1; i >= 0; i--) {
 				printf("%d", path[i]);
-				if (i < path.size() - 1) {
+				if (i > 0) {
 					printf(" --> ");
 				}
 			}
